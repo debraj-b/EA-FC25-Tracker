@@ -449,21 +449,138 @@
         .current-player-section {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            padding: 15px;
+            padding: 20px;
             margin-top: 20px;
         }
 
         .current-player-title {
-            font-size: 1.2em;
-            margin-bottom: 10px;
+            font-size: 1.3em;
+            margin-bottom: 15px;
             font-weight: 600;
         }
 
+        .player-selection {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .player-select {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 250px;
+            flex: 1;
+        }
+
+        .player-select option {
+            background: #333;
+            color: white;
+        }
+
+        .player-select:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .quick-auction-btn {
+            background: #ffd700;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-auction-btn:hover {
+            background: #ffed4e;
+            transform: translateY(-1px);
+        }
+
         .current-player-display {
-            font-size: 1.5em;
+            font-size: 1.4em;
             font-weight: bold;
             color: #ffd700;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            margin-bottom: 15px;
+        }
+
+        .auction-controls-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .owner-controls, .price-controls {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .control-label {
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            font-weight: 600;
+            opacity: 0.9;
+        }
+
+        .owner-select, .price-input-timer {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 100%;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .owner-select option {
+            background: #333;
+            color: white;
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .quick-btn.sold {
+            background: #2ed573;
+            border-color: #2ed573;
+        }
+
+        .quick-btn.bidding {
+            background: #ffa502;
+            border-color: #ffa502;
         }
 
         @media (max-width: 768px) {
@@ -500,6 +617,21 @@
             .timer-settings {
                 flex-direction: column;
                 gap: 10px;
+            }
+
+            .auction-controls-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .player-selection {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .quick-auction-btn {
+                width: 100%;
+                margin-top: 10px;
             }
         }
     </style>
@@ -548,8 +680,41 @@
             </div>
 
             <div class="current-player-section">
-                <div class="current-player-title">🎯 Current Player Up for Auction</div>
-                <div class="current-player-display" id="currentPlayerDisplay">Select a player to start auction</div>
+                <div class="current-player-title">🎯 Auction Management</div>
+                
+                <div class="player-selection">
+                    <select class="player-select" id="playerSelect" onchange="selectPlayerForAuction()">
+                        <option value="">Select player to auction...</option>
+                    </select>
+                    <button class="quick-auction-btn" onclick="quickStartAuction()">Start Auction</button>
+                </div>
+
+                <div class="current-player-display" id="currentPlayerDisplay">No player selected</div>
+
+                <div class="auction-controls-grid" id="auctionControls" style="display: none;">
+                    <div class="owner-controls">
+                        <div class="control-label">👤 Assign Owner</div>
+                        <select class="owner-select" id="currentOwnerSelect" onchange="updateCurrentPlayerOwner()">
+                            <option value="">Select owner...</option>
+                        </select>
+                        <div class="quick-actions">
+                            <button class="quick-btn bidding" onclick="setCurrentPlayerStatus('Bidding')">Set Bidding</button>
+                            <button class="quick-btn sold" onclick="setCurrentPlayerStatus('Sold')">Mark Sold</button>
+                        </div>
+                    </div>
+                    
+                    <div class="price-controls">
+                        <div class="control-label">💰 Sale Price</div>
+                        <input type="number" class="price-input-timer" id="currentPriceInput" 
+                               placeholder="Enter price..." onchange="updateCurrentPlayerPrice()">
+                        <div class="quick-actions">
+                            <button class="quick-btn" onclick="setQuickPrice(10)">$10</button>
+                            <button class="quick-btn" onclick="setQuickPrice(20)">$20</button>
+                            <button class="quick-btn" onclick="setQuickPrice(50)">$50</button>
+                            <button class="quick-btn" onclick="setQuickPrice(100)">$100</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -649,12 +814,16 @@
                 updateTable();
                 updateStats();
                 initializeCreditsTracker();
+                populatePlayerSelect();
+                populateOwnerSelect();
             } catch (error) {
                 console.error('Error loading players:', error);
                 // Fallback: create empty players array
                 players = [];
                 filteredPlayers = [];
                 initializeCreditsTracker();
+                populatePlayerSelect();
+                populateOwnerSelect();
             }
         }
 
@@ -683,6 +852,9 @@
                 `;
                 creditsGrid.appendChild(card);
             });
+            
+            // Update owner select in timer section
+            populateOwnerSelect();
         }
 
         function updatePlayerName(playerId, newName) {
@@ -1279,6 +1451,112 @@
                 resetTimer();
                 alert(`🎯 Auction started for ${player.playername}! Press Start Timer when ready.`);
             }
+        }
+
+        function populatePlayerSelect() {
+            const playerSelect = document.getElementById('playerSelect');
+            if (!playerSelect) return;
+            
+            playerSelect.innerHTML = '<option value="">Select player to auction...</option>';
+            
+            players.forEach(player => {
+                if (player.status === 'Available') {
+                    const option = document.createElement('option');
+                    option.value = player.id;
+                    option.textContent = `${player.playername} (${player.rating} ${player.position})`;
+                    playerSelect.appendChild(option);
+                }
+            });
+        }
+
+        function populateOwnerSelect() {
+            const ownerSelect = document.getElementById('currentOwnerSelect');
+            if (!ownerSelect) return;
+            
+            ownerSelect.innerHTML = '<option value="">Select owner...</option>';
+            
+            auctionPlayers.forEach(auctionPlayer => {
+                const option = document.createElement('option');
+                option.value = auctionPlayer.name;
+                option.textContent = `${auctionPlayer.name} (${auctionPlayer.credits} credits)`;
+                ownerSelect.appendChild(option);
+            });
+        }
+
+        function selectPlayerForAuction() {
+            const playerId = document.getElementById('playerSelect').value;
+            if (!playerId) {
+                currentAuctionPlayer = null;
+                document.getElementById('currentPlayerDisplay').textContent = 'No player selected';
+                document.getElementById('auctionControls').style.display = 'none';
+                return;
+            }
+            
+            const player = players.find(p => p.id == playerId);
+            if (player) {
+                currentAuctionPlayer = player;
+                document.getElementById('currentPlayerDisplay').textContent = 
+                    `${player.playername} (${player.rating} ${player.position})`;
+                document.getElementById('auctionControls').style.display = 'grid';
+                
+                // Update current values
+                document.getElementById('currentOwnerSelect').value = player.owner || '';
+                document.getElementById('currentPriceInput').value = player.purchasePrice || '';
+                
+                resetTimer();
+            }
+        }
+
+        function quickStartAuction() {
+            const playerId = document.getElementById('playerSelect').value;
+            if (!playerId) {
+                alert('Please select a player first!');
+                return;
+            }
+            
+            selectPlayerForAuction();
+            alert(`🎯 Auction ready for ${currentAuctionPlayer.playername}! Press Start Timer to begin.`);
+        }
+
+        function updateCurrentPlayerOwner() {
+            if (!currentAuctionPlayer) return;
+            
+            const newOwner = document.getElementById('currentOwnerSelect').value;
+            updatePlayerOwner(currentAuctionPlayer.id, newOwner);
+            
+            // Refresh displays
+            updateTable();
+            updateStats();
+            populateOwnerSelect(); // Refresh credits display
+        }
+
+        function updateCurrentPlayerPrice() {
+            if (!currentAuctionPlayer) return;
+            
+            const newPrice = document.getElementById('currentPriceInput').value;
+            updatePlayerPrice(currentAuctionPlayer.id, newPrice);
+            
+            // Refresh displays
+            updateTable();
+            updateStats();
+        }
+
+        function setCurrentPlayerStatus(status) {
+            if (!currentAuctionPlayer) return;
+            
+            setStatus(currentAuctionPlayer.id, status);
+            
+            if (status === 'Sold') {
+                pauseTimer();
+                alert(`✅ ${currentAuctionPlayer.playername} marked as SOLD!`);
+            }
+        }
+
+        function setQuickPrice(amount) {
+            if (!currentAuctionPlayer) return;
+            
+            document.getElementById('currentPriceInput').value = amount;
+            updateCurrentPlayerPrice();
         }
 
         // Event listeners
