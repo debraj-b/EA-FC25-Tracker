@@ -245,6 +245,44 @@
             transform: translateY(-3px);
         }
 
+        .position-counts {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 5px;
+            margin-top: 8px;
+        }
+
+        .position-stat {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 6px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .position-stat.has-players {
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .squad-summary {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            padding: 8px;
+            margin-top: 8px;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
         .player-name-input {
             background: rgba(255, 255, 255, 0.2);
             border: 2px solid rgba(255, 255, 255, 0.3);
@@ -330,6 +368,9 @@
             box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
             text-align: center;
             color: white;
+            position: sticky;
+            top: 20px;
+            z-index: 10;
         }
 
         .timer-title {
@@ -687,6 +728,7 @@
                         <option value="">Select player to auction...</option>
                     </select>
                     <button class="quick-auction-btn" onclick="quickStartAuction()">Start Auction</button>
+                    <button class="quick-auction-btn" onclick="selectNextAvailablePlayer()" style="background: #3742fa;">Next Player</button>
                 </div>
 
                 <div class="current-player-display" id="currentPlayerDisplay">No player selected</div>
@@ -798,7 +840,8 @@
                 const headers = lines[0].split(',');
                 
                 players = lines.slice(1).map((line, index) => {
-                    const values = line.split(',');
+                    // Handle trailing commas by removing empty values at the end
+                    const values = line.split(',').map(v => v.trim());
                     return {
                         id: index,
                         playername: values[0] || '',
@@ -849,11 +892,21 @@
                         <button class="credit-btn" onclick="addCredits(${player.id})">Add</button>
                         <button class="credit-btn" onclick="resetCredits(${player.id})">Reset</button>
                     </div>
+                    <div class="position-counts" id="positions-${player.id}">
+                        <div style="font-weight: 600; margin-bottom: 5px;">Squad Composition</div>
+                        <div class="position-grid" id="position-grid-${player.id}">
+                            <!-- Position counts will be populated here -->
+                        </div>
+                        <div class="squad-summary" id="squad-summary-${player.id}">
+                            0 players owned
+                        </div>
+                    </div>
                 `;
                 creditsGrid.appendChild(card);
             });
             
-            // Update owner select in timer section
+            // Update position counts and owner select
+            updateAllPositionCounts();
             populateOwnerSelect();
         }
 
@@ -1079,6 +1132,8 @@
 
             updateTable();
             updateStats();
+            updateAllPositionCounts();
+            populatePlayerSelect(); // Refresh available players
             saveCreditsData();
         }
 
@@ -1123,6 +1178,7 @@
                 player.status = 'Available';
                 updateTable();
                 updateStats();
+                updateAllPositionCounts();
             }
         }
 
@@ -1150,6 +1206,7 @@
                 saveCreditsData();
                 updateTable();
                 updateStats();
+                updateAllPositionCounts();
             }
         }
 
@@ -1460,7 +1517,7 @@
             playerSelect.innerHTML = '<option value="">Select player to auction...</option>';
             
             players.forEach(player => {
-                if (player.status === 'Available') {
+                if (player.status === 'Available' || !player.status) {
                     const option = document.createElement('option');
                     option.value = player.id;
                     option.textContent = `${player.playername} (${player.rating} ${player.position})`;
@@ -1528,6 +1585,7 @@
             updateTable();
             updateStats();
             populateOwnerSelect(); // Refresh credits display
+            updateAllPositionCounts();
         }
 
         function updateCurrentPlayerPrice() {
@@ -1539,16 +1597,29 @@
             // Refresh displays
             updateTable();
             updateStats();
+            updateAllPositionCounts();
         }
 
         function setCurrentPlayerStatus(status) {
             if (!currentAuctionPlayer) return;
             
             setStatus(currentAuctionPlayer.id, status);
+            populatePlayerSelect(); // Refresh available players
+            updateAllPositionCounts();
             
             if (status === 'Sold') {
                 pauseTimer();
                 alert(`✅ ${currentAuctionPlayer.playername} marked as SOLD!`);
+                
+                // Auto-select next player if available
+                setTimeout(() => {
+                    const availablePlayers = players.filter(p => p.status === 'Available' || !p.status);
+                    if (availablePlayers.length > 0) {
+                        if (confirm('🎯 Move to next available player?')) {
+                            selectNextAvailablePlayer();
+                        }
+                    }
+                }, 500);
             }
         }
 
@@ -1557,6 +1628,85 @@
             
             document.getElementById('currentPriceInput').value = amount;
             updateCurrentPlayerPrice();
+        }
+
+        function getPlayerPositionCounts(ownerName) {
+            const positions = ['GK', 'CB', 'LB', 'RB', 'CDM', 'CM', 'CAM', 'LW', 'RW', 'ST', 'CF'];
+            const positionCounts = {};
+            
+            // Initialize all positions with 0
+            positions.forEach(pos => positionCounts[pos] = 0);
+            
+            // Count owned players by position
+            players.forEach(player => {
+                if (player.owner === ownerName && player.status === 'Sold') {
+                    const pos = player.position;
+                    if (positionCounts.hasOwnProperty(pos)) {
+                        positionCounts[pos]++;
+                    }
+                }
+            });
+            
+            return positionCounts;
+        }
+
+        function updatePositionCounts(auctionPlayerId) {
+            const auctionPlayer = auctionPlayers.find(ap => ap.id === auctionPlayerId);
+            if (!auctionPlayer) return;
+            
+            const positionCounts = getPlayerPositionCounts(auctionPlayer.name);
+            const totalPlayers = Object.values(positionCounts).reduce((sum, count) => sum + count, 0);
+            
+            // Update position grid
+            const positionGrid = document.getElementById(`position-grid-${auctionPlayerId}`);
+            if (positionGrid) {
+                positionGrid.innerHTML = '';
+                
+                Object.entries(positionCounts).forEach(([position, count]) => {
+                    const positionDiv = document.createElement('div');
+                    positionDiv.className = `position-stat ${count > 0 ? 'has-players' : ''}`;
+                    positionDiv.textContent = `${position}: ${count}`;
+                    positionGrid.appendChild(positionDiv);
+                });
+            }
+            
+            // Update squad summary
+            const squadSummary = document.getElementById(`squad-summary-${auctionPlayerId}`);
+            if (squadSummary) {
+                const spentCredits = 100 - auctionPlayer.credits;
+                squadSummary.textContent = `${totalPlayers} players owned • $${spentCredits} spent`;
+            }
+        }
+
+        function updateAllPositionCounts() {
+            auctionPlayers.forEach(player => {
+                updatePositionCounts(player.id);
+            });
+        }
+
+        function selectNextAvailablePlayer() {
+            const availablePlayers = players.filter(p => p.status === 'Available' || !p.status);
+            
+            if (availablePlayers.length === 0) {
+                alert('🎉 All players have been auctioned!');
+                return;
+            }
+            
+            // Find current player index
+            let currentIndex = -1;
+            if (currentAuctionPlayer) {
+                currentIndex = availablePlayers.findIndex(p => p.id === currentAuctionPlayer.id);
+            }
+            
+            // Select next player (or first if none selected)
+            const nextIndex = (currentIndex + 1) % availablePlayers.length;
+            const nextPlayer = availablePlayers[nextIndex];
+            
+            // Update dropdown and select player
+            document.getElementById('playerSelect').value = nextPlayer.id;
+            selectPlayerForAuction();
+            
+            alert(`🎯 Next player: ${nextPlayer.playername}! Ready to start auction.`);
         }
 
         // Event listeners
