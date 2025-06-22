@@ -322,6 +322,150 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .auction-timer-section {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+            text-align: center;
+            color: white;
+        }
+
+        .timer-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .timer-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer-display.warning {
+            color: #ffa502;
+            animation: pulse 1s infinite;
+        }
+
+        .timer-display.critical {
+            color: #ff4757;
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .timer-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 100px;
+        }
+
+        .timer-btn-start {
+            background: #2ed573;
+            color: white;
+        }
+
+        .timer-btn-pause {
+            background: #ffa502;
+            color: white;
+        }
+
+        .timer-btn-reset {
+            background: #ff4757;
+            color: white;
+        }
+
+        .timer-btn-add {
+            background: #3742fa;
+            color: white;
+        }
+
+        .timer-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .timer-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .timer-settings {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .timer-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            width: 80px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .timer-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .timer-input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .timer-label {
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .current-player-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+
+        .current-player-title {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .current-player-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -338,6 +482,24 @@
             
             .stats {
                 grid-template-columns: 1fr;
+            }
+
+            .timer-display {
+                font-size: 3em;
+            }
+
+            .timer-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .timer-btn {
+                width: 200px;
+            }
+
+            .timer-settings {
+                flex-direction: column;
+                gap: 10px;
             }
         }
     </style>
@@ -362,6 +524,32 @@
             <div class="stat-card">
                 <div class="stat-number" id="totalValue">$0</div>
                 <div class="stat-label">Total Value</div>
+            </div>
+        </div>
+
+        <div class="auction-timer-section">
+            <h2 class="timer-title">⏱️ Auction Timer</h2>
+            <div class="timer-display" id="timerDisplay">02:00</div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn timer-btn-start" id="startBtn" onclick="startTimer()">▶️ Start</button>
+                <button class="timer-btn timer-btn-pause" id="pauseBtn" onclick="pauseTimer()" disabled>⏸️ Pause</button>
+                <button class="timer-btn timer-btn-reset" id="resetBtn" onclick="resetTimer()">🔄 Reset</button>
+                <button class="timer-btn timer-btn-add" onclick="addTimeToTimer()">➕ Add 30s</button>
+            </div>
+
+            <div class="timer-settings">
+                <span class="timer-label">Set Timer:</span>
+                <input type="number" class="timer-input" id="minutesInput" placeholder="2" min="0" max="10" value="2">
+                <span class="timer-label">min</span>
+                <input type="number" class="timer-input" id="secondsInput" placeholder="0" min="0" max="59" value="0">
+                <span class="timer-label">sec</span>
+                <button class="timer-btn timer-btn-add" onclick="setCustomTimer()">Set</button>
+            </div>
+
+            <div class="current-player-section">
+                <div class="current-player-title">🎯 Current Player Up for Auction</div>
+                <div class="current-player-display" id="currentPlayerDisplay">Select a player to start auction</div>
             </div>
         </div>
 
@@ -428,6 +616,13 @@
             { id: 5, name: 'Player 5', credits: 100 },
             { id: 6, name: 'Player 6', credits: 100 }
         ];
+
+        // Timer variables
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let currentTime = 120; // 2 minutes in seconds
+        let originalTime = 120;
+        let currentAuctionPlayer = null;
 
         // Load CSV data
         async function loadPlayers() {
@@ -594,6 +789,7 @@
                         <span class="status status-${player.status.toLowerCase()}">${player.status}</span>
                     </td>
                     <td>
+                        <button class="action-btn bid-btn" onclick="startAuctionForPlayer(${player.id})">🎯 Auction</button>
                         <button class="action-btn bid-btn" onclick="setStatus(${player.id}, 'Bidding')">Bid</button>
                         <button class="action-btn sell-btn" onclick="setStatus(${player.id}, 'Sold')">Sell</button>
                         <button class="action-btn reset-btn" onclick="resetPlayer(${player.id})">Reset</button>
@@ -953,6 +1149,136 @@
             
             // Show success message
             alert(`Auction results exported! ${soldPlayers.length} sold players included.`);
+        }
+
+        // Timer Functions
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            display.textContent = formatTime(currentTime);
+            
+            // Add visual warnings
+            display.classList.remove('warning', 'critical');
+            if (currentTime <= 10) {
+                display.classList.add('critical');
+            } else if (currentTime <= 30) {
+                display.classList.add('warning');
+            }
+        }
+
+        function startTimer() {
+            if (isTimerRunning) return;
+            
+            isTimerRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            
+            timerInterval = setInterval(() => {
+                currentTime--;
+                updateTimerDisplay();
+                
+                if (currentTime <= 0) {
+                    timerExpired();
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            if (!isTimerRunning) return;
+            
+            isTimerRunning = false;
+            clearInterval(timerInterval);
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            currentTime = originalTime;
+            updateTimerDisplay();
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+        }
+
+        function addTimeToTimer() {
+            currentTime += 30;
+            updateTimerDisplay();
+        }
+
+        function setCustomTimer() {
+            const minutes = parseInt(document.getElementById('minutesInput').value) || 0;
+            const seconds = parseInt(document.getElementById('secondsInput').value) || 0;
+            
+            if (minutes === 0 && seconds === 0) {
+                alert('Please enter a valid time');
+                return;
+            }
+            
+            pauseTimer();
+            originalTime = (minutes * 60) + seconds;
+            currentTime = originalTime;
+            updateTimerDisplay();
+        }
+
+        function timerExpired() {
+            pauseTimer();
+            
+            // Visual alert
+            document.getElementById('timerDisplay').classList.add('critical');
+            
+            // Audio alert
+            playAlertSound();
+            
+            // Show alert
+            alert('⏰ TIME\'S UP! Auction time expired for ' + (currentAuctionPlayer || 'current player'));
+            
+            // Flash the screen
+            document.body.style.backgroundColor = '#ff4757';
+            setTimeout(() => {
+                document.body.style.backgroundColor = '';
+            }, 200);
+        }
+
+        function playAlertSound() {
+            // Create audio context and play beep sound
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 800;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (error) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function setCurrentAuctionPlayer(playerName) {
+            currentAuctionPlayer = playerName;
+            document.getElementById('currentPlayerDisplay').textContent = playerName;
+        }
+
+        function startAuctionForPlayer(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (player) {
+                setCurrentAuctionPlayer(`${player.playername} (${player.rating} ${player.position})`);
+                resetTimer();
+                alert(`🎯 Auction started for ${player.playername}! Press Start Timer when ready.`);
+            }
         }
 
         // Event listeners
