@@ -13,195 +13,121 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 25%, #2d1b69 50%, #0f0f23 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            background: #0a0a0a;
             min-height: 100vh;
             padding: 20px;
             position: relative;
             overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(120, 119, 255, 0.2) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            color: #ffffff;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: rgba(15, 15, 35, 0.95);
-            border-radius: 20px;
+            background: #111111;
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: 
-                0 0 50px rgba(120, 119, 198, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(120, 119, 198, 0.3);
-            backdrop-filter: blur(10px);
-            position: relative;
-        }
-
-        .container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #7877c6, #ff77c6, #77c6ff, #7877c6);
-            border-radius: 22px;
-            z-index: -1;
-            animation: borderGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes borderGlow {
-            0% { opacity: 0.5; }
-            100% { opacity: 1; }
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            border: 1px solid #333333;
         }
 
         h1 {
             text-align: center;
             color: #ffffff;
-            margin-bottom: 30px;
-            font-size: 3em;
-            font-weight: 800;
-            text-shadow: 
-                0 0 10px rgba(120, 119, 198, 0.8),
-                0 0 20px rgba(120, 119, 198, 0.6),
-                0 0 30px rgba(120, 119, 198, 0.4);
-            background: linear-gradient(45deg, #7877c6, #ff77c6, #77c6ff);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: textShine 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes textShine {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            margin-bottom: 40px;
+            font-size: 2.8em;
+            font-weight: 700;
+            letter-spacing: 1px;
         }
 
         .controls {
             display: flex;
             flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
+            gap: 20px;
+            margin-bottom: 40px;
             align-items: center;
         }
 
         .search-box, .position-filter, select, input {
-            padding: 12px 15px;
-            border: 2px solid rgba(120, 119, 198, 0.4);
-            border-radius: 10px;
+            padding: 12px 16px;
+            border: 1px solid #444444;
+            border-radius: 8px;
             font-size: 16px;
-            background: rgba(15, 15, 35, 0.8);
+            background: #1a1a1a;
             color: #ffffff;
             transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
         }
 
         .search-box:focus, .position-filter:focus, select:focus, input:focus {
             outline: none;
-            border-color: #7877c6;
-            box-shadow: 
-                0 0 20px rgba(120, 119, 198, 0.4),
-                inset 0 0 20px rgba(120, 119, 198, 0.1);
-            background: rgba(15, 15, 35, 0.9);
+            border-color: #666666;
+            background: #222222;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
         }
 
         .search-box::placeholder, .position-filter::placeholder, input::placeholder {
-            color: rgba(255, 255, 255, 0.6);
+            color: #999999;
         }
 
         .btn {
             padding: 12px 20px;
-            background: linear-gradient(45deg, #7877c6, #ff77c6);
-            color: white;
-            border: none;
-            border-radius: 10px;
+            background: #333333;
+            color: #ffffff;
+            border: 1px solid #555555;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(120, 119, 198, 0.3);
-            border: 1px solid rgba(120, 119, 198, 0.4);
         }
 
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(120, 119, 198, 0.5);
-            background: linear-gradient(45deg, #8a89d4, #ff89d4);
+            background: #444444;
+            border-color: #666666;
+            transform: translateY(-1px);
         }
 
         .table-container {
             overflow-x: auto;
-            border-radius: 15px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(120, 119, 198, 0.2);
-            border: 1px solid rgba(120, 119, 198, 0.3);
-            backdrop-filter: blur(10px);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333333;
+            margin-bottom: 40px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: rgba(15, 15, 35, 0.95);
+            background: #1a1a1a;
         }
 
         th {
-            background: linear-gradient(45deg, rgba(120, 119, 198, 0.9), rgba(45, 27, 105, 0.9));
+            background: #333333;
             color: white;
-            padding: 18px 12px;
+            padding: 16px 12px;
             text-align: left;
-            font-weight: 700;
-            position: sticky;
-            top: 0;
-            z-index: 50;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.9em;
-            border-bottom: 2px solid rgba(120, 119, 198, 0.5);
+            letter-spacing: 0.5px;
+            font-size: 0.85em;
+            border-bottom: 1px solid #444444;
         }
 
         td {
-            padding: 15px 12px;
-            border-bottom: 1px solid rgba(120, 119, 198, 0.2);
+            padding: 14px 12px;
+            border-bottom: 1px solid #333333;
             transition: all 0.3s ease;
             color: #ffffff;
             background: transparent;
         }
 
         tr:hover {
-            background: rgba(120, 119, 198, 0.1);
-            transform: scale(1.01);
-        }
-
-        tr:hover td {
-            box-shadow: 0 0 20px rgba(120, 119, 198, 0.2);
+            background: #222222;
         }
 
         .player-name {
-            font-weight: 700;
+            font-weight: 600;
             color: #ffffff;
-            text-shadow: 0 0 10px rgba(120, 119, 198, 0.6);
         }
 
         .rating {
@@ -239,21 +165,27 @@
 
         .owner-input, .price-input {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 8px 10px;
+            border: 1px solid #444444;
+            border-radius: 4px;
             font-size: 14px;
-            background: white;
+            background: #222222;
+            color: #ffffff;
         }
 
         .owner-input {
             cursor: pointer;
         }
 
-        .owner-input:focus {
+        .owner-input:focus, .price-input:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+            border-color: #666666;
+            background: #333333;
+        }
+
+        .owner-input option {
+            background: #333333;
+            color: #ffffff;
         }
 
         .action-btn {
@@ -278,195 +210,130 @@
         .stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
+            gap: 20px;
             margin-bottom: 40px;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.9) 0%, rgba(45, 27, 105, 0.9) 100%);
+            background: #1a1a1a;
             color: white;
-            padding: 25px;
-            border-radius: 15px;
+            padding: 24px;
+            border-radius: 8px;
             text-align: center;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(120, 119, 198, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(120, 119, 198, 0.3);
-            backdrop-filter: blur(10px);
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333333;
+            transition: all 0.3s ease;
         }
 
         .stat-card:hover {
-            transform: translateY(-5px) scale(1.02);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                0 0 30px rgba(120, 119, 198, 0.4);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(45deg, transparent, rgba(120, 119, 198, 0.1), transparent);
-            border-radius: 15px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .stat-card:hover::before {
-            opacity: 1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            border-color: #555555;
         }
 
         .stat-number {
-            font-size: 2.5em;
-            font-weight: 900;
+            font-size: 2.2em;
+            font-weight: 700;
             margin-bottom: 8px;
-            background: linear-gradient(45deg, #7877c6, #ff77c6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(120, 119, 198, 0.5);
+            color: #ffffff;
         }
 
         .stat-label {
-            font-size: 1em;
-            font-weight: 600;
-            opacity: 0.9;
+            font-size: 0.9em;
+            font-weight: 500;
+            color: #cccccc;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
         .credits-section {
-            background: rgba(15, 15, 35, 0.95);
-            border-radius: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
             padding: 30px;
             margin-bottom: 40px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(120, 119, 198, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(120, 119, 198, 0.3);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333333;
         }
 
         .credits-title {
-            font-size: 2em;
+            font-size: 1.6em;
             color: #ffffff;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
             text-align: center;
-            font-weight: 700;
-            text-shadow: 0 0 10px rgba(120, 119, 198, 0.8);
-            background: linear-gradient(45deg, #7877c6, #ff77c6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: 600;
         }
 
         .credits-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
             align-items: start;
         }
 
         .player-credit-card {
-            background: linear-gradient(135deg, rgba(255, 119, 198, 0.9) 0%, rgba(120, 119, 255, 0.9) 100%);
+            background: #222222;
             color: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.3),
-                0 0 20px rgba(255, 119, 198, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 119, 198, 0.4);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            min-height: 280px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #444444;
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
         .player-credit-card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.4),
-                0 0 30px rgba(255, 119, 198, 0.5);
-        }
-
-        .player-credit-card::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            transform: rotate(45deg);
-            transition: all 0.6s ease;
-            opacity: 0;
-        }
-
-        .player-credit-card:hover::before {
-            opacity: 1;
-            animation: shimmer 1.5s ease-in-out;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            border-color: #666666;
         }
 
         .position-counts {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+            background: #1a1a1a;
+            border-radius: 6px;
             padding: 15px;
             margin-top: 15px;
             font-size: 0.9em;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #333333;
             flex: 1;
         }
 
         .position-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+            gap: 6px;
             margin-top: 10px;
         }
 
         .position-stat {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px 8px;
-            border-radius: 6px;
+            background: #333333;
+            padding: 4px 6px;
+            border-radius: 4px;
             text-align: center;
-            font-size: 0.8em;
+            font-size: 0.75em;
             font-weight: 600;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid #444444;
             transition: all 0.3s ease;
+            color: #cccccc;
         }
 
         .position-stat.has-players {
-            background: rgba(120, 119, 255, 0.3);
-            border: 1px solid rgba(120, 119, 255, 0.6);
-            box-shadow: 0 0 10px rgba(120, 119, 255, 0.3);
-            color: #fff;
+            background: #444444;
+            border: 1px solid #666666;
+            color: #ffffff;
         }
 
         .squad-summary {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
-            padding: 10px;
+            background: #333333;
+            border-radius: 4px;
+            padding: 8px;
             margin-top: 10px;
-            font-size: 0.85em;
+            font-size: 0.8em;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-weight: 600;
+            border: 1px solid #444444;
+            font-weight: 500;
+            color: #cccccc;
         }
 
         .player-name-input {
@@ -547,72 +414,30 @@
         }
 
         .auction-timer-section {
-            background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(238, 90, 36, 0.95) 100%);
-            border-radius: 20px;
+            background: #1a1a1a;
+            border-radius: 8px;
             padding: 30px;
             margin-bottom: 40px;
-            box-shadow: 
-                0 15px 35px rgba(255, 107, 107, 0.4),
-                0 0 30px rgba(255, 107, 107, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 107, 107, 0.5);
-            backdrop-filter: blur(15px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            border: 1px solid #333333;
             text-align: center;
             color: white;
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            overflow: hidden;
-        }
-
-        .auction-timer-section::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: conic-gradient(transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: rotateGlow 8s linear infinite;
-            pointer-events: none;
-        }
-
-        @keyframes rotateGlow {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            position: relative;
         }
 
         .timer-title {
-            font-size: 2em;
-            margin-bottom: 25px;
-            font-weight: 700;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
-            position: relative;
-            z-index: 1;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #ffffff;
         }
 
         .timer-display {
-            font-size: 5em;
-            font-weight: 900;
-            margin-bottom: 25px;
-            text-shadow: 
-                0 0 20px rgba(255, 255, 255, 0.8),
-                0 0 40px rgba(255, 255, 255, 0.6),
-                0 0 60px rgba(255, 255, 255, 0.4);
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 20px;
             font-family: 'Courier New', monospace;
-            position: relative;
-            z-index: 1;
-            background: linear-gradient(45deg, #ffffff, #ff77c6, #ffffff);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: timerShine 2s ease-in-out infinite alternate;
-        }
-
-        @keyframes timerShine {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
+            color: #ffffff;
         }
 
         .timer-display.warning {
@@ -865,23 +690,23 @@
 
         @media (max-width: 768px) {
             body {
-                padding: 10px;
+                padding: 15px;
             }
 
             .container {
                 padding: 20px;
-                margin: 0 auto;
             }
 
             h1 {
                 font-size: 2.2em;
-                margin-bottom: 20px;
+                margin-bottom: 30px;
             }
             
             .controls {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 12px;
+                gap: 15px;
+                margin-bottom: 30px;
             }
             
             .controls > * {
@@ -891,15 +716,16 @@
             .stats {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
                 gap: 15px;
+                margin-bottom: 30px;
             }
 
             .credits-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 15px;
             }
 
             .timer-display {
-                font-size: 3.5em;
+                font-size: 3em;
             }
 
             .timer-controls {
@@ -935,42 +761,43 @@
                 margin-top: 0;
             }
 
-            .player-credit-card {
-                min-height: auto;
-                padding: 20px;
-            }
-
             .position-grid {
-                grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
-                gap: 6px;
+                grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+                gap: 4px;
             }
 
             table {
-                font-size: 0.9em;
+                font-size: 0.85em;
             }
 
             th, td {
-                padding: 10px 8px;
+                padding: 8px 6px;
             }
 
-            .auction-timer-section {
-                position: relative;
-                top: 0;
-                margin-bottom: 20px;
+            .auction-timer-section,
+            .credits-section {
+                margin-bottom: 30px;
             }
         }
 
         @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
             .container {
                 padding: 15px;
             }
 
             h1 {
                 font-size: 1.8em;
+                margin-bottom: 25px;
             }
 
             .stats {
                 grid-template-columns: 1fr;
+                gap: 10px;
+                margin-bottom: 25px;
             }
 
             .timer-display {
@@ -978,11 +805,18 @@
             }
 
             .stat-card {
-                padding: 20px;
+                padding: 16px;
             }
 
-            .auction-timer-section {
+            .auction-timer-section,
+            .credits-section {
                 padding: 20px;
+                margin-bottom: 25px;
+            }
+
+            .controls {
+                gap: 12px;
+                margin-bottom: 25px;
             }
         }
     </style>
