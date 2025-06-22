@@ -403,6 +403,17 @@
             100% { transform: scale(1); }
         }
 
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         .timer-controls {
             display: flex;
             justify-content: center;
@@ -923,7 +934,7 @@
             const amount = parseInt(spendingInput.value);
             
             if (!amount || amount <= 0) {
-                alert('Please enter a valid amount to spend');
+                showValidationError('Please enter a valid amount to spend (greater than $0)');
                 return;
             }
 
@@ -931,7 +942,7 @@
             if (!player) return;
 
             if (amount > player.credits) {
-                alert('Insufficient credits!');
+                showValidationError(`❌ Insufficient credits! ${player.name} has $${player.credits} but trying to spend $${amount}.`);
                 return;
             }
 
@@ -939,6 +950,7 @@
             document.getElementById(`credits-${playerId}`).textContent = player.credits;
             spendingInput.value = '';
             spendingInput.max = player.credits;
+            updateAllPositionCounts(); // Update displays
             saveCreditsData();
         }
 
@@ -947,7 +959,12 @@
             const amount = parseInt(spendingInput.value);
             
             if (!amount || amount <= 0) {
-                alert('Please enter a valid amount to add');
+                showValidationError('Please enter a valid amount to add (greater than $0)');
+                return;
+            }
+
+            if (amount > 500) {
+                showValidationError('Cannot add more than $500 at once. Please use smaller amounts.');
                 return;
             }
 
@@ -958,6 +975,7 @@
             document.getElementById(`credits-${playerId}`).textContent = player.credits;
             spendingInput.value = '';
             spendingInput.max = player.credits;
+            updateAllPositionCounts(); // Update displays
             saveCreditsData();
         }
 
@@ -1046,6 +1064,15 @@
             const player = players.find(p => p.id === playerId);
             if (!player) return;
 
+            // Validate price format
+            if (newPrice && newPrice !== '') {
+                const priceValidation = validatePriceRange(newPrice);
+                if (!priceValidation.valid) {
+                    showValidationError(priceValidation.message);
+                    return;
+                }
+            }
+
             const oldPrice = parseFloat(player.purchasePrice) || 0;
             const price = parseFloat(newPrice) || 0;
             const owner = player.owner;
@@ -1061,8 +1088,13 @@
                     
                     // Check if new price can be afforded
                     if (price > 0) {
-                        if (auctionPlayer.credits < price) {
-                            alert(`${owner} has insufficient credits! Available: ${auctionPlayer.credits}, Required: ${price}`);
+                        const creditValidation = validateOwnerCredits(owner, price);
+                        if (!creditValidation.valid) {
+                            showValidationError(creditValidation.message);
+                            // Restore old price
+                            if (oldPrice > 0) {
+                                auctionPlayer.credits -= oldPrice;
+                            }
                             return;
                         }
                         auctionPlayer.credits -= price;
@@ -1078,6 +1110,8 @@
 
             player.purchasePrice = newPrice;
             updateStats();
+            updateAllPositionCounts();
+            populatePlayerSelect();
         }
 
         function getOwnerOptions(selectedOwner) {
@@ -1107,17 +1141,19 @@
             // Update player owner
             player.owner = newOwner;
 
-            // If new owner is selected and price is set, deduct credits
+            // If new owner is selected and price is set, validate and deduct credits
             if (newOwner && price > 0) {
+                const creditValidation = validateOwnerCredits(newOwner, price);
+                if (!creditValidation.valid) {
+                    showValidationError(creditValidation.message);
+                    // Revert the change
+                    player.owner = oldOwner;
+                    updateTable();
+                    return;
+                }
+                
                 const newAuctionPlayer = auctionPlayers.find(ap => ap.name === newOwner);
                 if (newAuctionPlayer) {
-                    if (newAuctionPlayer.credits < price) {
-                        alert(`${newOwner} has insufficient credits! Available: ${newAuctionPlayer.credits}, Required: ${price}`);
-                        // Revert the change
-                        player.owner = oldOwner;
-                        updateTable();
-                        return;
-                    }
                     newAuctionPlayer.credits -= price;
                     updateCreditsDisplay(newAuctionPlayer.id);
                 }
@@ -1150,11 +1186,22 @@
 
         function setStatus(id, status) {
             const player = players.find(p => p.id === id);
-            if (player) {
-                player.status = status;
-                updateTable();
-                updateStats();
+            if (!player) return;
+            
+            // Validate if marking as sold
+            if (status === 'Sold') {
+                const validation = validateSaleTransaction(player, player.owner, player.purchasePrice);
+                if (!validation.valid) {
+                    showValidationError(validation.message);
+                    return;
+                }
             }
+            
+            player.status = status;
+            updateTable();
+            updateStats();
+            updateAllPositionCounts();
+            populatePlayerSelect();
         }
 
         function resetPlayer(id) {
@@ -1592,6 +1639,25 @@
             if (!currentAuctionPlayer) return;
             
             const newPrice = document.getElementById('currentPriceInput').value;
+            
+            // Validate price
+            if (newPrice && newPrice !== '') {
+                const priceValidation = validatePriceRange(newPrice);
+                if (!priceValidation.valid) {
+                    showValidationError(priceValidation.message);
+                    return;
+                }
+                
+                // If owner is assigned, validate credits
+                if (currentAuctionPlayer.owner) {
+                    const creditValidation = validateOwnerCredits(currentAuctionPlayer.owner, parseFloat(newPrice));
+                    if (!creditValidation.valid) {
+                        showValidationError(creditValidation.message);
+                        return;
+                    }
+                }
+            }
+            
             updatePlayerPrice(currentAuctionPlayer.id, newPrice);
             
             // Refresh displays
@@ -1602,6 +1668,20 @@
 
         function setCurrentPlayerStatus(status) {
             if (!currentAuctionPlayer) return;
+            
+            // Validate sale transaction if marking as sold
+            if (status === 'Sold') {
+                const validation = validateSaleTransaction(
+                    currentAuctionPlayer,
+                    currentAuctionPlayer.owner,
+                    currentAuctionPlayer.purchasePrice
+                );
+                
+                if (!validation.valid) {
+                    showValidationError(validation.message);
+                    return;
+                }
+            }
             
             setStatus(currentAuctionPlayer.id, status);
             populatePlayerSelect(); // Refresh available players
@@ -1707,6 +1787,109 @@
             selectPlayerForAuction();
             
             alert(`🎯 Next player: ${nextPlayer.playername}! Ready to start auction.`);
+        }
+
+        // Validation Functions
+        function validateOwnerCredits(ownerName, price) {
+            const auctionPlayer = auctionPlayers.find(ap => ap.name === ownerName);
+            if (!auctionPlayer) {
+                return { valid: false, message: 'Owner not found in auction participants.' };
+            }
+            
+            if (price > auctionPlayer.credits) {
+                return { 
+                    valid: false, 
+                    message: `❌ Insufficient credits! ${ownerName} has $${auctionPlayer.credits} but needs $${price}.` 
+                };
+            }
+            
+            return { valid: true };
+        }
+
+        function validateSaleTransaction(player, owner, price) {
+            // Check if player exists
+            if (!player) {
+                return { valid: false, message: 'Player not found.' };
+            }
+
+            // Check if owner is assigned
+            if (!owner || owner.trim() === '') {
+                return { 
+                    valid: false, 
+                    message: `❌ Cannot sell ${player.playername}! Please assign an owner first.` 
+                };
+            }
+
+            // Check if price is set and valid
+            if (!price || price <= 0) {
+                return { 
+                    valid: false, 
+                    message: `❌ Cannot sell ${player.playername}! Please set a valid price first. (Price must be greater than $0)` 
+                };
+            }
+
+            // Validate price against credits
+            const creditCheck = validateOwnerCredits(owner, parseFloat(price));
+            if (!creditCheck.valid) {
+                return creditCheck;
+            }
+
+            return { valid: true };
+        }
+
+        function validatePriceRange(price) {
+            const numPrice = parseFloat(price);
+            
+            if (isNaN(numPrice)) {
+                return { valid: false, message: 'Please enter a valid number for price.' };
+            }
+            
+            if (numPrice < 0) {
+                return { valid: false, message: 'Price cannot be negative.' };
+            }
+            
+            if (numPrice > 200) {
+                return { 
+                    valid: false, 
+                    message: 'Price seems too high ($200+ per player). Please confirm this is correct.' 
+                };
+            }
+            
+            return { valid: true };
+        }
+
+        function showValidationError(message) {
+            // Create or update error display
+            let errorDiv = document.getElementById('validation-error');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.id = 'validation-error';
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: #ff4757;
+                    color: white;
+                    padding: 15px 20px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3);
+                    z-index: 1000;
+                    max-width: 400px;
+                    font-weight: 600;
+                    animation: slideIn 0.3s ease;
+                `;
+                document.body.appendChild(errorDiv);
+            }
+            
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            }, 5000);
         }
 
         // Event listeners
