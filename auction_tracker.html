@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EA FC25 Player Auction Tracker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+
+        .search-box, .position-filter, select, input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus, .position-filter:focus, select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: #f8f9ff;
+        }
+
+        .player-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .rating {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+            text-align: center;
+        }
+
+        .rating-90plus { background: #ff6b6b; }
+        .rating-85plus { background: #feca57; }
+        .rating-80plus { background: #48dbfb; }
+
+        .position {
+            background: #341f97;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .status-available { background: #2ed573; color: white; }
+        .status-sold { background: #ff4757; color: white; }
+        .status-bidding { background: #ffa502; color: white; }
+
+        .owner-input, .price-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .owner-input {
+            cursor: pointer;
+        }
+
+        .owner-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            margin: 2px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .bid-btn { background: #ffa502; color: white; }
+        .sell-btn { background: #2ed573; color: white; }
+        .reset-btn { background: #ff4757; color: white; }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .credits-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .credits-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .credits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .player-credit-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(240, 147, 251, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .player-credit-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .player-name-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .player-name-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .player-name-input:focus {
+            outline: none;
+            border-color: white;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .credits-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .credits-amount {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .credits-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .credits-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .credit-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .credit-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: white;
+        }
+
+        .spending-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px;
+            border-radius: 6px;
+            width: 80px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .spending-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls > * {
+                width: 100%;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏆 EA FC25 Player Auction Tracker</h1>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalPlayers">0</div>
+                <div class="stat-label">Total Players</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="availablePlayers">0</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="soldPlayers">0</div>
+                <div class="stat-label">Sold</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalValue">$0</div>
+                <div class="stat-label">Total Value</div>
+            </div>
+        </div>
+
+        <div class="credits-section">
+            <h2 class="credits-title">💳 Player Credits Tracker</h2>
+            <div class="credits-grid" id="creditsGrid">
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" class="search-box" placeholder="Search players..." id="searchInput">
+            <select class="position-filter" id="positionFilter">
+                <option value="">All Positions</option>
+                <option value="GK">Goalkeepers</option>
+                <option value="CB">Center Backs</option>
+                <option value="LB">Left Backs</option>
+                <option value="RB">Right Backs</option>
+                <option value="CDM">Defensive Midfielders</option>
+                <option value="CM">Center Midfielders</option>
+                <option value="CAM">Attacking Midfielders</option>
+                <option value="LW">Left Wingers</option>
+                <option value="RW">Right Wingers</option>
+                <option value="ST">Strikers</option>
+                <option value="CF">Center Forwards</option>
+            </select>
+            <select id="statusFilter">
+                <option value="">All Status</option>
+                <option value="Available">Available</option>
+                <option value="Bidding">Bidding</option>
+                <option value="Sold">Sold</option>
+            </select>
+            <button class="btn" onclick="exportData()">📊 Export All Data</button>
+            <button class="btn" onclick="exportAuctionResults()">🏆 Export Auction Results</button>
+            <button class="btn" onclick="resetAllPlayers()">🔄 Reset All</button>
+        </div>
+
+        <div class="table-container">
+            <table id="playersTable">
+                <thead>
+                    <tr>
+                        <th>Player Name</th>
+                        <th>Rating</th>
+                        <th>Position</th>
+                        <th>Owner</th>
+                        <th>Purchase Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let filteredPlayers = [];
+        let auctionPlayers = [
+            { id: 1, name: 'Player 1', credits: 100 },
+            { id: 2, name: 'Player 2', credits: 100 },
+            { id: 3, name: 'Player 3', credits: 100 },
+            { id: 4, name: 'Player 4', credits: 100 },
+            { id: 5, name: 'Player 5', credits: 100 },
+            { id: 6, name: 'Player 6', credits: 100 }
+        ];
+
+        // Load CSV data
+        async function loadPlayers() {
+            try {
+                const response = await fetch('ea_fc25_top_players.csv');
+                const csvText = await response.text();
+                const lines = csvText.trim().split('\n');
+                const headers = lines[0].split(',');
+                
+                players = lines.slice(1).map((line, index) => {
+                    const values = line.split(',');
+                    return {
+                        id: index,
+                        playername: values[0] || '',
+                        rating: parseInt(values[1]) || 0,
+                        position: values[2] || '',
+                        owner: values[3] || '',
+                        purchasePrice: values[4] || '',
+                        status: values[5] || 'Available'
+                    };
+                });
+                
+                filteredPlayers = [...players];
+                updateTable();
+                updateStats();
+                initializeCreditsTracker();
+            } catch (error) {
+                console.error('Error loading players:', error);
+                // Fallback: create empty players array
+                players = [];
+                filteredPlayers = [];
+                initializeCreditsTracker();
+            }
+        }
+
+        function initializeCreditsTracker() {
+            const creditsGrid = document.getElementById('creditsGrid');
+            creditsGrid.innerHTML = '';
+
+            auctionPlayers.forEach(player => {
+                const card = document.createElement('div');
+                card.className = 'player-credit-card';
+                card.innerHTML = `
+                    <input type="text" class="player-name-input" value="${player.name}" 
+                           placeholder="Enter player name" 
+                           onchange="updatePlayerName(${player.id}, this.value)">
+                    <div class="credits-display">
+                        <div class="credits-amount" id="credits-${player.id}">${player.credits}</div>
+                        <div class="credits-label">Credits</div>
+                    </div>
+                    <div class="credits-controls">
+                        <input type="number" class="spending-input" placeholder="Amount" 
+                               id="spending-${player.id}" min="0" max="${player.credits}">
+                        <button class="credit-btn" onclick="spendCredits(${player.id})">Spend</button>
+                        <button class="credit-btn" onclick="addCredits(${player.id})">Add</button>
+                        <button class="credit-btn" onclick="resetCredits(${player.id})">Reset</button>
+                    </div>
+                `;
+                creditsGrid.appendChild(card);
+            });
+        }
+
+        function updatePlayerName(playerId, newName) {
+            const player = auctionPlayers.find(p => p.id === playerId);
+            if (player) {
+                player.name = newName;
+                saveCreditsData();
+            }
+        }
+
+        function spendCredits(playerId) {
+            const spendingInput = document.getElementById(`spending-${playerId}`);
+            const amount = parseInt(spendingInput.value);
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount to spend');
+                return;
+            }
+
+            const player = auctionPlayers.find(p => p.id === playerId);
+            if (!player) return;
+
+            if (amount > player.credits) {
+                alert('Insufficient credits!');
+                return;
+            }
+
+            player.credits -= amount;
+            document.getElementById(`credits-${playerId}`).textContent = player.credits;
+            spendingInput.value = '';
+            spendingInput.max = player.credits;
+            saveCreditsData();
+        }
+
+        function addCredits(playerId) {
+            const spendingInput = document.getElementById(`spending-${playerId}`);
+            const amount = parseInt(spendingInput.value);
+            
+            if (!amount || amount <= 0) {
+                alert('Please enter a valid amount to add');
+                return;
+            }
+
+            const player = auctionPlayers.find(p => p.id === playerId);
+            if (!player) return;
+
+            player.credits += amount;
+            document.getElementById(`credits-${playerId}`).textContent = player.credits;
+            spendingInput.value = '';
+            spendingInput.max = player.credits;
+            saveCreditsData();
+        }
+
+        function resetCredits(playerId) {
+            const player = auctionPlayers.find(p => p.id === playerId);
+            if (!player) return;
+
+            if (confirm(`Reset ${player.name}'s credits to 100?`)) {
+                player.credits = 100;
+                document.getElementById(`credits-${playerId}`).textContent = player.credits;
+                document.getElementById(`spending-${playerId}`).max = player.credits;
+                saveCreditsData();
+            }
+        }
+
+        function saveCreditsData() {
+            localStorage.setItem('auctionPlayersCredits', JSON.stringify(auctionPlayers));
+        }
+
+        function loadCreditsData() {
+            const saved = localStorage.getItem('auctionPlayersCredits');
+            if (saved) {
+                auctionPlayers = JSON.parse(saved);
+            }
+        }
+
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            filteredPlayers.forEach(player => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="player-name">${player.playername}</td>
+                    <td>
+                        <span class="rating ${getRatingClass(player.rating)}">${player.rating}</span>
+                    </td>
+                    <td>
+                        <span class="position">${player.position}</span>
+                    </td>
+                    <td>
+                        <select class="owner-input" value="${player.owner}" 
+                                onchange="updatePlayerOwner(${player.id}, this.value)">
+                            <option value="">Select Owner</option>
+                            ${getOwnerOptions(player.owner)}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="number" class="price-input" value="${player.purchasePrice}" 
+                               onchange="updatePlayer(${player.id}, 'purchasePrice', this.value)" 
+                               placeholder="$0">
+                    </td>
+                    <td>
+                        <span class="status status-${player.status.toLowerCase()}">${player.status}</span>
+                    </td>
+                    <td>
+                        <button class="action-btn bid-btn" onclick="setStatus(${player.id}, 'Bidding')">Bid</button>
+                        <button class="action-btn sell-btn" onclick="setStatus(${player.id}, 'Sold')">Sell</button>
+                        <button class="action-btn reset-btn" onclick="resetPlayer(${player.id})">Reset</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getRatingClass(rating) {
+            if (rating >= 90) return 'rating-90plus';
+            if (rating >= 85) return 'rating-85plus';
+            return 'rating-80plus';
+        }
+
+        function updatePlayer(id, field, value) {
+            const player = players.find(p => p.id === id);
+            if (player) {
+                if (field === 'purchasePrice') {
+                    updatePlayerPrice(id, value);
+                } else {
+                    player[field] = value;
+                    updateStats();
+                }
+            }
+        }
+
+        function updatePlayerPrice(playerId, newPrice) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            const oldPrice = parseFloat(player.purchasePrice) || 0;
+            const price = parseFloat(newPrice) || 0;
+            const owner = player.owner;
+
+            // If there's an owner, handle credit adjustments
+            if (owner) {
+                const auctionPlayer = auctionPlayers.find(ap => ap.name === owner);
+                if (auctionPlayer) {
+                    // Refund old price
+                    if (oldPrice > 0) {
+                        auctionPlayer.credits += oldPrice;
+                    }
+                    
+                    // Check if new price can be afforded
+                    if (price > 0) {
+                        if (auctionPlayer.credits < price) {
+                            alert(`${owner} has insufficient credits! Available: ${auctionPlayer.credits}, Required: ${price}`);
+                            return;
+                        }
+                        auctionPlayer.credits -= price;
+                        player.status = 'Sold';
+                    } else {
+                        player.status = 'Available';
+                    }
+                    
+                    updateCreditsDisplay(auctionPlayer.id);
+                    saveCreditsData();
+                }
+            }
+
+            player.purchasePrice = newPrice;
+            updateStats();
+        }
+
+        function getOwnerOptions(selectedOwner) {
+            return auctionPlayers.map(auctionPlayer => 
+                `<option value="${auctionPlayer.name}" ${selectedOwner === auctionPlayer.name ? 'selected' : ''}>
+                    ${auctionPlayer.name} (${auctionPlayer.credits} credits)
+                </option>`
+            ).join('');
+        }
+
+        function updatePlayerOwner(playerId, newOwner) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            const oldOwner = player.owner;
+            const price = parseFloat(player.purchasePrice) || 0;
+
+            // If changing from one owner to another, refund the old owner
+            if (oldOwner && oldOwner !== newOwner) {
+                const oldAuctionPlayer = auctionPlayers.find(ap => ap.name === oldOwner);
+                if (oldAuctionPlayer && price > 0) {
+                    oldAuctionPlayer.credits += price;
+                    updateCreditsDisplay(oldAuctionPlayer.id);
+                }
+            }
+
+            // Update player owner
+            player.owner = newOwner;
+
+            // If new owner is selected and price is set, deduct credits
+            if (newOwner && price > 0) {
+                const newAuctionPlayer = auctionPlayers.find(ap => ap.name === newOwner);
+                if (newAuctionPlayer) {
+                    if (newAuctionPlayer.credits < price) {
+                        alert(`${newOwner} has insufficient credits! Available: ${newAuctionPlayer.credits}, Required: ${price}`);
+                        // Revert the change
+                        player.owner = oldOwner;
+                        updateTable();
+                        return;
+                    }
+                    newAuctionPlayer.credits -= price;
+                    updateCreditsDisplay(newAuctionPlayer.id);
+                }
+            }
+
+            // Auto-set status to Sold if owner and price are set
+            if (newOwner && price > 0) {
+                player.status = 'Sold';
+            } else if (!newOwner) {
+                player.status = 'Available';
+            }
+
+            updateTable();
+            updateStats();
+            saveCreditsData();
+        }
+
+        function updateCreditsDisplay(auctionPlayerId) {
+            const creditsElement = document.getElementById(`credits-${auctionPlayerId}`);
+            const spendingInput = document.getElementById(`spending-${auctionPlayerId}`);
+            const auctionPlayer = auctionPlayers.find(ap => ap.id === auctionPlayerId);
+            
+            if (creditsElement && auctionPlayer) {
+                creditsElement.textContent = auctionPlayer.credits;
+                spendingInput.max = auctionPlayer.credits;
+            }
+        }
+
+        function setStatus(id, status) {
+            const player = players.find(p => p.id === id);
+            if (player) {
+                player.status = status;
+                updateTable();
+                updateStats();
+            }
+        }
+
+        function resetPlayer(id) {
+            const player = players.find(p => p.id === id);
+            if (player) {
+                // Refund credits to owner if applicable
+                const owner = player.owner;
+                const price = parseFloat(player.purchasePrice) || 0;
+                
+                if (owner && price > 0) {
+                    const auctionPlayer = auctionPlayers.find(ap => ap.name === owner);
+                    if (auctionPlayer) {
+                        auctionPlayer.credits += price;
+                        updateCreditsDisplay(auctionPlayer.id);
+                        saveCreditsData();
+                    }
+                }
+                
+                player.owner = '';
+                player.purchasePrice = '';
+                player.status = 'Available';
+                updateTable();
+                updateStats();
+            }
+        }
+
+        function resetAllPlayers() {
+            if (confirm('Are you sure you want to reset all players? This will also refund all credits.')) {
+                // Refund all credits for sold players
+                players.forEach(player => {
+                    const owner = player.owner;
+                    const price = parseFloat(player.purchasePrice) || 0;
+                    
+                    if (owner && price > 0) {
+                        const auctionPlayer = auctionPlayers.find(ap => ap.name === owner);
+                        if (auctionPlayer) {
+                            auctionPlayer.credits += price;
+                        }
+                    }
+                    
+                    player.owner = '';
+                    player.purchasePrice = '';
+                    player.status = 'Available';
+                });
+                
+                // Update all credit displays
+                auctionPlayers.forEach(ap => updateCreditsDisplay(ap.id));
+                saveCreditsData();
+                updateTable();
+                updateStats();
+            }
+        }
+
+        function updateStats() {
+            const total = players.length;
+            const available = players.filter(p => p.status === 'Available').length;
+            const sold = players.filter(p => p.status === 'Sold').length;
+            const totalValue = players
+                .filter(p => p.purchasePrice && p.status === 'Sold')
+                .reduce((sum, p) => sum + parseFloat(p.purchasePrice || 0), 0);
+
+            document.getElementById('totalPlayers').textContent = total;
+            document.getElementById('availablePlayers').textContent = available;
+            document.getElementById('soldPlayers').textContent = sold;
+            document.getElementById('totalValue').textContent = `$${totalValue.toLocaleString()}`;
+        }
+
+        function filterPlayers() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const positionFilter = document.getElementById('positionFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredPlayers = players.filter(player => {
+                const matchesSearch = player.playername.toLowerCase().includes(searchTerm);
+                const matchesPosition = !positionFilter || player.position === positionFilter;
+                const matchesStatus = !statusFilter || player.status === statusFilter;
+                
+                return matchesSearch && matchesPosition && matchesStatus;
+            });
+
+            updateTable();
+        }
+
+        function exportData() {
+            const csvContent = [
+                ['Player Name', 'Rating', 'Position', 'Owner', 'Purchase Price', 'Status'],
+                ...players.map(p => [p.playername, p.rating, p.position, p.owner, p.purchasePrice, p.status])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `all_players_data_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function exportAuctionResults() {
+            // Get all sold players
+            const soldPlayers = players.filter(p => p.status === 'Sold' && p.owner);
+            
+            if (soldPlayers.length === 0) {
+                alert('No players have been sold yet. Complete some auction transactions first.');
+                return;
+            }
+
+            // Group players by owner
+            const ownershipData = {};
+            auctionPlayers.forEach(ap => {
+                ownershipData[ap.name] = {
+                    name: ap.name,
+                    remainingCredits: ap.credits,
+                    players: [],
+                    totalSpent: 0,
+                    playerCount: 0
+                };
+            });
+
+            soldPlayers.forEach(player => {
+                if (ownershipData[player.owner]) {
+                    const price = parseFloat(player.purchasePrice) || 0;
+                    ownershipData[player.owner].players.push({
+                        name: player.playername,
+                        position: player.position,
+                        rating: player.rating,
+                        price: price
+                    });
+                    ownershipData[player.owner].totalSpent += price;
+                    ownershipData[player.owner].playerCount++;
+                }
+            });
+
+            // Create detailed CSV
+            const csvContent = [];
+            
+            // Header
+            csvContent.push(['=== EA FC25 AUCTION RESULTS ===']);
+            csvContent.push([`Auction Date: ${new Date().toLocaleDateString()}`]);
+            csvContent.push([`Total Players Sold: ${soldPlayers.length}`]);
+            csvContent.push(['']);
+            
+            // Summary by owner
+            csvContent.push(['=== OWNER SUMMARY ===']);
+            csvContent.push(['Owner Name', 'Players Owned', 'Total Spent', 'Remaining Credits', 'Starting Credits']);
+            
+            Object.values(ownershipData).forEach(owner => {
+                const startingCredits = owner.remainingCredits + owner.totalSpent;
+                csvContent.push([
+                    owner.name,
+                    owner.playerCount,
+                    `$${owner.totalSpent}`,
+                    `$${owner.remainingCredits}`,
+                    `$${startingCredits}`
+                ]);
+            });
+            
+            csvContent.push(['']);
+            
+            // Detailed player ownership
+            csvContent.push(['=== DETAILED PLAYER OWNERSHIP ===']);
+            csvContent.push(['Owner', 'Player Name', 'Position', 'Rating', 'Purchase Price']);
+            
+            Object.values(ownershipData).forEach(owner => {
+                if (owner.players.length > 0) {
+                    owner.players
+                        .sort((a, b) => b.rating - a.rating) // Sort by rating descending
+                        .forEach(player => {
+                            csvContent.push([
+                                owner.name,
+                                player.name,
+                                player.position,
+                                player.rating,
+                                `$${player.price}`
+                            ]);
+                        });
+                }
+            });
+            
+            csvContent.push(['']);
+            
+            // Top purchases
+            csvContent.push(['=== TOP PURCHASES ===']);
+            csvContent.push(['Player Name', 'Owner', 'Position', 'Rating', 'Price']);
+            
+            const topPurchases = soldPlayers
+                .sort((a, b) => (parseFloat(b.purchasePrice) || 0) - (parseFloat(a.purchasePrice) || 0))
+                .slice(0, 10);
+            
+            topPurchases.forEach(player => {
+                csvContent.push([
+                    player.playername,
+                    player.owner,
+                    player.position,
+                    player.rating,
+                    `$${player.purchasePrice}`
+                ]);
+            });
+
+            // Convert to CSV format
+            const csvString = csvContent.map(row => 
+                row.map(cell => 
+                    typeof cell === 'string' && cell.includes(',') ? `"${cell}"` : cell
+                ).join(',')
+            ).join('\n');
+
+            // Download
+            const blob = new Blob([csvString], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `auction_results_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            // Show success message
+            alert(`Auction results exported! ${soldPlayers.length} sold players included.`);
+        }
+
+        // Event listeners
+        document.getElementById('searchInput').addEventListener('input', filterPlayers);
+        document.getElementById('positionFilter').addEventListener('change', filterPlayers);
+        document.getElementById('statusFilter').addEventListener('change', filterPlayers);
+
+        // Initialize
+        loadCreditsData();
+        loadPlayers();
+    </script>
+</body>
+</html>
